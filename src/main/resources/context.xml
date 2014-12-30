@@ -2,10 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:jee="http://www.springframework.org/schema/jee"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:security="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
 			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
@@ -16,15 +14,24 @@
 
 	<context:annotation-config />
 
-	<!--
-		DATABASE SETUP 
-	 -->
+	<!-- DATABASE SETUP -->
 
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
-		<property name="username" value="sa" />
-		<property name="password" value="" />
-		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-		<property name="url" value="jdbc:hsqldb:mem:montgomery" />
+	<bean id="dataConfigPropertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="searchSystemEnvironment" value="true" />
+	</bean>
+	<bean class="java.net.URI" id="dbUrl">
+		<constructor-arg value="${DATABASE_URL}" />
+	</bean>
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="org.postgresql.Driver" />
+		<property name="url"
+			value="#{'jdbc:postgresql://' + @dbUrl.getHost() + @dbUrl.getPath() }" />
+		<property name="username" value="#{@dbUrl.getUserInfo().split(':')[0]}" />
+		<property name="password" value="#{@dbUrl.getUserInfo().split(':')[1]}" />
+		<property name="maxWait" value="5000" />
+        <property name="connectionProperties" value="ssl=true;sslfactory=org.postgresql.ssl.NonValidatingFactory"></property>
 	</bean>
 
 	<bean id="entityManagerFactory"
@@ -37,19 +44,29 @@
 				<property name="showSql" value="true" />
 			</bean>
 		</property>
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- change this to 'verify' before running as a production app -->
+				<prop key="hibernate.hbm2ddl.auto">create-drop</prop>
+			</props>
+		</property>
 	</bean>
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
-	
-	<bean id="newsEntryDao" class="fr.davidsan.montgomery.app.dao.newsentry.JpaNewsEntryDao">
+
+	<bean id="newsEntryDao"
+		class="fr.davidsan.montgomery.app.dao.newsentry.JpaNewsEntryDao">
 	</bean>
-	
-	<bean id="userDao" class="fr.davidsan.montgomery.app.dao.user.JpaUserDao">
+
+	<bean id="userDao" class="fr.davidsan.montgomery.app.dao.user.JpaPersonDao">
 	</bean>
-	
-	<bean id="dataBaseInitializer" class="fr.davidsan.montgomery.app.dao.DataBaseInitializer" init-method="initDataBase">
+
+	<bean id="dataBaseInitializer" class="fr.davidsan.montgomery.app.dao.DataBaseInitializer"
+		init-method="initDataBase">
 		<constructor-arg ref="userDao" />
 		<constructor-arg ref="newsEntryDao" />
 		<constructor-arg ref="passwordEncoder" />
@@ -57,49 +74,52 @@
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
-	<!--
-		INIT REST COMPONENTS 
-	 -->
-	
+	<!-- INIT REST COMPONENTS -->
+
 	<context:component-scan base-package="fr.davidsan.montgomery.app.rest.resources" />
-	
+
 	<bean id="objectMapper" class="org.codehaus.jackson.map.ObjectMapper" />
-	
-	<!-- 
-		SPRING SECURITY SETUP
-	-->
-	
-	<bean id="passwordEncoder" class="org.springframework.security.crypto.password.StandardPasswordEncoder">
+
+	<!-- SPRING SECURITY SETUP -->
+
+	<bean id="passwordEncoder"
+		class="org.springframework.security.crypto.password.StandardPasswordEncoder">
 		<constructor-arg value="dhqsJSm7qVEPAym34eRDyAQUfNpXPY4X" />
 	</bean>
-	
+
 	<!-- Allow annotation based security for roles -->
-	<security:global-method-security pre-post-annotations="enabled"/>
-	
+	<security:global-method-security
+		pre-post-annotations="enabled" />
+
 	<security:authentication-manager id="authenticationManager">
-		<security:authentication-provider user-service-ref="userDao">
+		<security:authentication-provider
+			user-service-ref="userDao">
 			<security:password-encoder ref="passwordEncoder"></security:password-encoder>
 		</security:authentication-provider>
 	</security:authentication-manager>
 
-	<security:http
-			realm="Protected API"
-			use-expressions="true"
-			auto-config="false"
-			create-session="stateless"
-			entry-point-ref="unauthorizedEntryPoint"
-			authentication-manager-ref="authenticationManager">
-		<security:custom-filter ref="authenticationTokenProcessingFilter" position="FORM_LOGIN_FILTER" />
-		<security:intercept-url pattern="/rest/user/authenticate" access="permitAll" />
-		<security:intercept-url method="GET" pattern="/rest/news/**" access="hasRole('user')" />
-		<security:intercept-url method="PUT" pattern="/rest/news/**" access="hasRole('admin')" />
-<!-- 		<security:intercept-url method="POST" pattern="/rest/news/**" access="hasRole('admin')" /> -->
-		<security:intercept-url method="DELETE" pattern="/rest/news/**" access="hasRole('admin')" />
+	<security:http realm="Protected API" use-expressions="true"
+		auto-config="false" create-session="stateless" entry-point-ref="unauthorizedEntryPoint"
+		authentication-manager-ref="authenticationManager">
+		<security:custom-filter ref="authenticationTokenProcessingFilter"
+			position="FORM_LOGIN_FILTER" />
+		<security:intercept-url pattern="/rest/user/authenticate"
+			access="permitAll" />
+		<security:intercept-url method="GET" pattern="/rest/news/**"
+			access="hasRole('user')" />
+		<security:intercept-url method="PUT" pattern="/rest/news/**"
+			access="hasRole('admin')" />
+		<!-- <security:intercept-url method="POST" pattern="/rest/news/**" access="hasRole('admin')" 
+			/> -->
+		<security:intercept-url method="DELETE"
+			pattern="/rest/news/**" access="hasRole('admin')" />
 	</security:http>
 
 	<bean id="unauthorizedEntryPoint" class="fr.davidsan.montgomery.app.rest.UnauthorizedEntryPoint" />
 
-	<bean class="fr.davidsan.montgomery.app.rest.AuthenticationTokenProcessingFilter" id="authenticationTokenProcessingFilter">
+	<bean
+		class="fr.davidsan.montgomery.app.rest.AuthenticationTokenProcessingFilter"
+		id="authenticationTokenProcessingFilter">
 		<constructor-arg ref="userDao" />
 	</bean>
 
