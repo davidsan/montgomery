@@ -1,10 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>fr.davidsan.montgomery</groupId>
-	<artifactId>montgomery-app</artifactId>
+    <prerequisites>
+        <maven>3.0.0</maven>
+    </prerequisites>
+	
+	<groupId>fr.davidsan.montgomery.app</groupId>
+	<artifactId>montgomery</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
-	<packaging>war</packaging>
+    <name>Project Montgomery</name>
+    <packaging>war</packaging>
 
 	<properties>
 		<!-- Spring Security is based on Spring 3.0.7 -->
@@ -21,9 +26,6 @@
 		<org.eclipse.jetty.jetty-maven-plugin.version>9.1.1.v20140108</org.eclipse.jetty.jetty-maven-plugin.version>
 	</properties>
 
-	<prerequisites>
-		<maven>2.2.1</maven>
-	</prerequisites>
 
 	<build>
 		<plugins>
@@ -32,15 +34,31 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${org.eclipse.jetty.jetty-maven-plugin.version}</version>
-			</plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.3</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals><goal>copy</goal></goals>
+                    <configuration>
+                        <artifactItems>
+                            <artifactItem>
+                                <groupId>org.mortbay.jetty</groupId>
+                                <artifactId>jetty-runner</artifactId>
+                                <version>7.5.4.v20111024</version>
+                                <destFileName>jetty-runner.jar</destFileName>
+                            </artifactItem>
+                        </artifactItems>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
 		</plugins>
 	</build>
 	
