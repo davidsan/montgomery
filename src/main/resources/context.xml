@@ -62,7 +62,7 @@
 		class="fr.davidsan.montgomery.app.dao.newsentry.JpaNewsEntryDao">
 	</bean>
 
-	<bean id="userDao" class="fr.davidsan.montgomery.app.dao.user.JpaPersonDao">
+	<bean id="userDao" class="fr.davidsan.montgomery.app.dao.user.JpaUserDao">
 	</bean>
 
 	<bean id="dataBaseInitializer" class="fr.davidsan.montgomery.app.dao.DataBaseInitializer"

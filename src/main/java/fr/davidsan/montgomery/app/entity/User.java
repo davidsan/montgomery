@@ -5,17 +5,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @javax.persistence.Entity
+@Table(name = "`users`") // because Postgres contains an user table
 public class User implements Entity, UserDetails {
 
 	private static final long serialVersionUID = 1L;
@@ -31,6 +34,7 @@ public class User implements Entity, UserDetails {
 	private String password;
 
 	@ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name="users_roles") 
 	private Set<String> roles = new HashSet<String>();
 
 	protected User() {
