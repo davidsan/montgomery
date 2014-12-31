@@ -7,5 +7,6 @@
 	<persistence-unit name="montgomeryPU">
 		<class>fr.davidsan.montgomery.app.entity.NewsEntry</class>
 		<class>fr.davidsan.montgomery.app.entity.User</class>
+		<class>fr.davidsan.montgomery.app.entity.MailEntry</class>
 	</persistence-unit>
 </persistence>

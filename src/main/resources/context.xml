@@ -87,6 +87,10 @@
 
 	<bean id="userDao" class="fr.davidsan.montgomery.app.dao.user.JpaUserDao">
 	</bean>
+	
+	<bean id="mailEntryDao" 
+	class="fr.davidsan.montgomery.app.dao.mailentry.JpaMailEntryDao">
+	</bean>
 
 	<bean id="dataBaseInitializer" class="fr.davidsan.montgomery.app.dao.DataBaseInitializer"
 		init-method="initDataBase">
