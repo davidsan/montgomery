@@ -18,7 +18,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @javax.persistence.Entity
-@Table(name = "`users`") // because Postgres contains an user table
+@Table(name = "`users`")
+// because Postgres contains an user table
 public class User implements Entity, UserDetails {
 
 	private static final long serialVersionUID = 1L;
@@ -34,7 +35,7 @@ public class User implements Entity, UserDetails {
 	private String password;
 
 	@ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name="users_roles") 
+	@CollectionTable(name = "users_roles")
 	private Set<String> roles = new HashSet<String>();
 
 	protected User() {
