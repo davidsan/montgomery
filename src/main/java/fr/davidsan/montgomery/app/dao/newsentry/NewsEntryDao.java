@@ -1,7 +1,10 @@
 package fr.davidsan.montgomery.app.dao.newsentry;
 
+import java.util.List;
+
 import fr.davidsan.montgomery.app.dao.Dao;
 import fr.davidsan.montgomery.app.entity.NewsEntry;
+import fr.davidsan.montgomery.app.entity.User;
 
 /**
  * Definition of a Data Access Object that can perform CRUD Operations for
@@ -10,4 +13,5 @@ import fr.davidsan.montgomery.app.entity.NewsEntry;
  */
 public interface NewsEntryDao extends Dao<NewsEntry, Long> {
 
+	List<NewsEntry> findByAuthor(User author);
 }

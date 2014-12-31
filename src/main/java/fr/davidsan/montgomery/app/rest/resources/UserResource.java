@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,7 +35,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import fr.davidsan.montgomery.app.JsonViews;
+import fr.davidsan.montgomery.app.dao.newsentry.NewsEntryDao;
 import fr.davidsan.montgomery.app.dao.user.UserDao;
+import fr.davidsan.montgomery.app.entity.NewsEntry;
 import fr.davidsan.montgomery.app.entity.User;
 import fr.davidsan.montgomery.app.rest.TokenUtils;
 import fr.davidsan.montgomery.app.transfer.TokenTransfer;
@@ -144,12 +147,16 @@ public class UserResource {
 
 	@Autowired
 	private UserDao userDao;
+	
+	@Autowired
+	private NewsEntryDao newsEntryDao;
 
 	@Autowired
 	private ObjectMapper mapper;
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@PreAuthorize("hasRole('user')")
 	public String list() throws JsonGenerationException, JsonMappingException,
 			IOException {
 		this.logger.info("list()");
@@ -168,6 +175,7 @@ public class UserResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}")
+	@PreAuthorize("hasRole('user')")
 	public String read(@PathParam("id") Long id)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		this.logger.info("read(id)");
@@ -189,7 +197,31 @@ public class UserResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{id}/news")
+	@PreAuthorize("hasRole('user')")
+	public String listNews(@PathParam("id") Long id)
+			throws JsonGenerationException, JsonMappingException, IOException {
+		this.logger.info("listNews(id)");
+
+		User user = this.userDao.find(id);
+		if (user == null) {
+			throw new WebApplicationException(404);
+		}
+
+		ObjectWriter viewWriter;
+		if (this.isAdmin()) {
+			viewWriter = this.mapper.writerWithView(JsonViews.Admin.class);
+		} else {
+			viewWriter = this.mapper.writerWithView(JsonViews.User.class);
+		}
+		List<NewsEntry> news = newsEntryDao.findByAuthor(user);
+		return viewWriter.writeValueAsString(news);
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
 	@Path("name/{query}")
+	@PreAuthorize("hasRole('user')")
 	public String findByName(@PathParam("query") String query)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		this.logger.info("read(query)");
@@ -208,10 +240,34 @@ public class UserResource {
 
 		return viewWriter.writeValueAsString(user);
 	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("name/{query}/news")
+	@PreAuthorize("hasRole('user')")
+	public String listNewsByName(@PathParam("query") String query)
+			throws JsonGenerationException, JsonMappingException, IOException {
+		this.logger.info("listNewsByName(id)");
+
+		User user = this.userDao.findByName(query);
+		if (user == null) {
+			throw new WebApplicationException(404);
+		}
+
+		ObjectWriter viewWriter;
+		if (this.isAdmin()) {
+			viewWriter = this.mapper.writerWithView(JsonViews.Admin.class);
+		} else {
+			viewWriter = this.mapper.writerWithView(JsonViews.User.class);
+		}
+		List<NewsEntry> news = newsEntryDao.findByAuthor(user);
+		return viewWriter.writeValueAsString(news);
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("email/{query}")
+	@PreAuthorize("hasRole('user')")
 	public String findByEmail(@PathParam("query") String query)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		this.logger.info("read(query)");
@@ -286,6 +342,7 @@ public class UserResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}/geo")
+	@PreAuthorize("hasRole('user')")
 	public GeoTransfer readGeo(@PathParam("id") Long id)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		this.logger.info("readGeo(id)");
@@ -301,6 +358,7 @@ public class UserResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("{id}/geo")
+	@PreAuthorize("hasRole('user')")
 	public GeoTransfer updateGeo(GeoTransfer geo) {
 		this.logger.info("updateGeo(): " + geo);
 

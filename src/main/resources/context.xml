@@ -134,12 +134,6 @@
 			access="permitAll" />
 		<security:intercept-url method="GET" pattern="/rest/news/**"
 			access="hasRole('user')" />
-		<security:intercept-url method="PUT" pattern="/rest/news/**"
-			access="hasRole('admin')" />
-		<!-- <security:intercept-url method="POST" pattern="/rest/news/**" access="hasRole('admin')" 
-			/> -->
-		<security:intercept-url method="DELETE"
-			pattern="/rest/news/**" access="hasRole('admin')" />
 	</security:http>
 
 	<bean id="unauthorizedEntryPoint" class="fr.davidsan.montgomery.app.rest.UnauthorizedEntryPoint" />
