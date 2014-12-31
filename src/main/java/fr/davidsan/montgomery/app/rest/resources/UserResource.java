@@ -206,6 +206,36 @@ public class UserResource {
 		return viewWriter.writeValueAsString(newUser);
 	}
 
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("{id}/password")
+	public String updatePassword(@PathParam("id") Long id, User user)
+			throws JsonGenerationException, JsonMappingException, IOException {
+		this.logger.info("updatePassword(): " + user);
+
+		ObjectWriter viewWriter;
+		if (this.isAdmin()) {
+			viewWriter = this.mapper.writerWithView(JsonViews.Admin.class);
+		} else {
+			viewWriter = this.mapper.writerWithView(JsonViews.User.class);
+		}
+
+		User authenticatedUser = this.getAuthenticatedUser();
+		if (authenticatedUser == null || authenticatedUser.getId() != id) {
+			throw new WebApplicationException(401);
+		}
+		User transientUser = this.userDao.find(id);
+		if (transientUser == null) {
+			throw new WebApplicationException(404);
+		}
+		transientUser.setPassword(this.passwordEncoder.encode(user
+				.getPassword()));
+
+		User newUser = this.userDao.save(transientUser);
+		return viewWriter.writeValueAsString(newUser);
+	}
+
 	/**
 	 * GeoResource
 	 */
