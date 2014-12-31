@@ -32,7 +32,7 @@ public class NewsEntry implements Entity {
 	@Column
 	private String content;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "author_id")
 	private User author;
 
