@@ -29,7 +29,9 @@ import org.springframework.stereotype.Component;
 
 import fr.davidsan.montgomery.app.JsonViews;
 import fr.davidsan.montgomery.app.dao.newsentry.NewsEntryDao;
+import fr.davidsan.montgomery.app.dao.user.UserDao;
 import fr.davidsan.montgomery.app.entity.NewsEntry;
+import fr.davidsan.montgomery.app.entity.User;
 
 @Component
 @Path("/news")
@@ -39,6 +41,9 @@ public class NewsEntryResource {
 
 	@Autowired
 	private NewsEntryDao newsEntryDao;
+
+	@Autowired
+	private UserDao userDao;
 
 	@Autowired
 	private ObjectMapper mapper;
@@ -63,44 +68,71 @@ public class NewsEntryResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}")
-	public NewsEntry read(@PathParam("id") Long id) {
+	public String read(@PathParam("id") Long id)
+			throws JsonGenerationException, JsonMappingException, IOException {
 		this.logger.info("read(id)");
 
 		NewsEntry newsEntry = this.newsEntryDao.find(id);
 		if (newsEntry == null) {
 			throw new WebApplicationException(404);
 		}
-		return newsEntry;
+		ObjectWriter viewWriter;
+		if (this.isAdmin()) {
+			viewWriter = this.mapper.writerWithView(JsonViews.Admin.class);
+		} else {
+			viewWriter = this.mapper.writerWithView(JsonViews.User.class);
+		}
+
+		return viewWriter.writeValueAsString(newsEntry);
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@PreAuthorize("hasRole('admin')")
-	public NewsEntry create(NewsEntry newsEntry) {
+	public String create(NewsEntry newsEntry) throws JsonGenerationException,
+			JsonMappingException, IOException {
 		this.logger.info("create(): " + newsEntry);
+		User user = getAuthenticatedUser();
+		if (user == null) {
+			throw new WebApplicationException(401);
+		}
+		newsEntry.setAuthor(user);
+		newsEntry = this.newsEntryDao.save(newsEntry);
 
-		return this.newsEntryDao.save(newsEntry);
+		return this.mapper.writerWithView(JsonViews.User.class)
+				.writeValueAsString(newsEntry);
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("{id}")
-	@PreAuthorize("hasRole('admin')")
-	public NewsEntry update(@PathParam("id") Long id, NewsEntry newsEntry) {
+	public String update(@PathParam("id") Long id, NewsEntry newsEntry)
+			throws JsonGenerationException, JsonMappingException, IOException {
 		this.logger.info("update(): " + newsEntry);
-		NewsEntry transientNewsEntry = this.read(id);
+		if (!this.isAdmin()) {
+			// allow update only if he is the author
+			User user = getAuthenticatedUser();
+			if (user == null || user.getId() != id) {
+				throw new WebApplicationException(401);
+			}
+		}
+		NewsEntry transientNewsEntry = this.newsEntryDao.find(id);
+		if (transientNewsEntry == null) {
+			throw new WebApplicationException(404);
+		}
 		transientNewsEntry.setContent(newsEntry.getContent());
-		return this.newsEntryDao.save(transientNewsEntry);
+		transientNewsEntry = this.newsEntryDao.save(transientNewsEntry);
+		return this.mapper.writerWithView(JsonViews.User.class)
+				.writeValueAsString(transientNewsEntry);
 	}
 
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}")
+	@PreAuthorize("hasRole('admin')")
 	public void delete(@PathParam("id") Long id) {
 		this.logger.info("delete(id)");
-
 		this.newsEntryDao.delete(id);
 	}
 
@@ -123,4 +155,17 @@ public class NewsEntryResource {
 		return false;
 	}
 
+	private User getAuthenticatedUser() {
+		Authentication authentication = SecurityContextHolder.getContext()
+				.getAuthentication();
+
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof String
+				&& ((String) principal).equals("anonymousUser")) {
+			return null;
+		}
+		UserDetails userDetails = (UserDetails) principal;
+
+		return userDao.findByName(userDetails.getUsername());
+	}
 }
