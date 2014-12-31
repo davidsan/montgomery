@@ -1,12 +1,6 @@
 package fr.davidsan.montgomery.app.dao.newsentry;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +34,36 @@ public class JpaNewsEntryDao extends JpaDao<NewsEntry, Long> implements
 	@Override
 	public List<NewsEntry> findByAuthor(User user) {
 
-		return this.getEntityManager().createQuery(
-			    "SELECT n FROM NewsEntry n WHERE n.author LIKE :user")
-			    .setParameter("user", user)
-			    .setMaxResults(100)
-			    .getResultList();
+		return this
+				.getEntityManager()
+				.createQuery(
+						"SELECT n FROM NewsEntry n WHERE n.author LIKE :user")
+				.setParameter("user", user).setMaxResults(100).getResultList();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<NewsEntry> findNearest(Double distance, Double geolat,
+			Double geolon) {
+
+		Double minLat = geolat - (distance / 69);
+		Double maxLat = geolat + (distance / 69);
+		Double minLon = geolon - distance
+				/ Math.abs(Math.cos(Math.toRadians(geolat)) * 69);
+		Double maxLon = geolon + distance
+				/ Math.abs(Math.cos(Math.toRadians(geolat)) * 69);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT n FROM NewsEntry n ");
+		sb.append("WHERE n.geolat >= :minLat ");
+		sb.append("AND n.geolat <= :maxLat ");
+		sb.append("AND n.geolon >= :minLon ");
+		sb.append("AND n.geolon <= :maxLon ");
+		sb.append("ORDER BY date DESC");
+		return this.getEntityManager().createQuery(sb.toString())
+				.setParameter("minLat", minLat).setParameter("maxLat", maxLat)
+				.setParameter("minLon", minLon).setParameter("maxLon", maxLon)
+				.setMaxResults(100).getResultList();
 	}
 
 }

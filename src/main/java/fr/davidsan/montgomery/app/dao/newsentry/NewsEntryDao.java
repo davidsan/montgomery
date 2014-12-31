@@ -14,4 +14,7 @@ import fr.davidsan.montgomery.app.entity.User;
 public interface NewsEntryDao extends Dao<NewsEntry, Long> {
 
 	List<NewsEntry> findByAuthor(User author);
+
+	List<NewsEntry> findNearest(Double distance, Double geolat, Double geolon);
+	
 }
