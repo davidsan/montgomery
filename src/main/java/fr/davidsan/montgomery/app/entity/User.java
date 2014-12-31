@@ -37,6 +37,10 @@ public class User implements Entity, UserDetails {
 	@Column(unique = true, length = 16, nullable = false)
 	@JsonView(JsonViews.User.class)
 	private String name;
+	
+	@Column(unique = true, length = 255, nullable = false)
+	@JsonView(JsonViews.Admin.class)
+	private String email;
 
 	@Column(length = 80, nullable = false)
 	@JsonView(JsonViews.Admin.class)
@@ -63,8 +67,9 @@ public class User implements Entity, UserDetails {
 		/* Reflection instantiation */
 	}
 
-	public User(String name, String passwordHash) {
+	public User(String name, String email, String passwordHash) {
 		this.name = name;
+		this.email = email;
 		this.password = passwordHash;
 	}
 
@@ -82,6 +87,14 @@ public class User implements Entity, UserDetails {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public Set<String> getRoles() {

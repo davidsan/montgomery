@@ -29,11 +29,13 @@ public class DataBaseInitializer {
 	}
 
 	public void initDataBase() {
-		User userUser = new User("user", this.passwordEncoder.encode("user"));
+		User userUser = new User("user", "user@user.com",
+				this.passwordEncoder.encode("user"));
 		userUser.addRole("user");
 		userUser = this.userDao.save(userUser);
 
-		User adminUser = new User("admin", this.passwordEncoder.encode("admin"));
+		User adminUser = new User("admin", "admin@admin.com",
+				this.passwordEncoder.encode("admin"));
 		adminUser.addRole("user");
 		adminUser.addRole("admin");
 		adminUser = this.userDao.save(adminUser);
@@ -62,7 +64,8 @@ public class DataBaseInitializer {
 	}
 
 	private User generateFakeUser(String name, Double geolat, Double geolon) {
-		User user = new User(name, this.passwordEncoder.encode(name));
+		User user = new User(name, name + "@" + name + ".com",
+				this.passwordEncoder.encode(name));
 		user.setGeolat(geolat);
 		user.setGeolon(geolon);
 		user.addRole("user");
