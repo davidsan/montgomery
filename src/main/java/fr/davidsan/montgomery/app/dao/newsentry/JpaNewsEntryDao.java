@@ -25,21 +25,15 @@ public class JpaNewsEntryDao extends JpaDao<NewsEntry, Long> implements
 		super(NewsEntry.class);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional(readOnly = true)
 	public List<NewsEntry> findAll() {
-		// order by date
-		final CriteriaBuilder builder = this.getEntityManager()
-				.getCriteriaBuilder();
-		final CriteriaQuery<NewsEntry> criteriaQuery = builder
-				.createQuery(NewsEntry.class);
-
-		Root<NewsEntry> root = criteriaQuery.from(NewsEntry.class);
-		criteriaQuery.orderBy(builder.desc(root.get("date")));
-
-		TypedQuery<NewsEntry> typedQuery = this.getEntityManager().createQuery(
-				criteriaQuery);
-		return typedQuery.getResultList();
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT n FROM NewsEntry n ");
+		sb.append("ORDER BY date DESC");
+		return this.getEntityManager().createQuery(sb.toString())
+				.setMaxResults(100).getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
