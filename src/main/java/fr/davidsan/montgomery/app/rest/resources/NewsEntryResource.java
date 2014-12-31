@@ -11,6 +11,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
@@ -156,6 +157,29 @@ public class NewsEntryResource {
 		}
 
 		return false;
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("feed")
+	@PreAuthorize("hasRole('user')")
+	public String newsfeed(@QueryParam(value = "distance") Double distance)
+			throws JsonGenerationException, JsonMappingException, IOException {
+		this.logger.info("newsfeed()");
+		User user = getAuthenticatedUser();
+		if (user == null) {
+			throw new WebApplicationException(401);
+		}
+		ObjectWriter viewWriter;
+		if (this.isAdmin()) {
+			viewWriter = this.mapper.writerWithView(JsonViews.Admin.class);
+		} else {
+			viewWriter = this.mapper.writerWithView(JsonViews.User.class);
+		}
+		List<NewsEntry> entries = this.newsEntryDao.findNearest(distance,
+				user.getGeolat(), user.getGeolon());
+
+		return viewWriter.writeValueAsString(entries);
 	}
 
 	private User getAuthenticatedUser() {
