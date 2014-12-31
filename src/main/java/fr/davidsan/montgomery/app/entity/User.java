@@ -50,6 +50,14 @@ public class User implements Entity, UserDetails {
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "author")
 	@JsonIgnore
 	private Set<NewsEntry> newsEntries;
+	
+	@Column(nullable = true)
+	@JsonView(JsonViews.Admin.class)
+	private Double geolat;
+	
+	@Column(nullable = true)
+	@JsonView(JsonViews.Admin.class)
+	private Double geolon;
  
 	protected User() {
 		/* Reflection instantiation */
@@ -103,6 +111,22 @@ public class User implements Entity, UserDetails {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	public Double getGeolat() {
+		return geolat;
+	}
+
+	public void setGeolat(Double geolat) {
+		this.geolat = geolat;
+	}
+
+	public Double getGeolon() {
+		return geolon;
+	}
+
+	public void setGeolon(Double geolon) {
+		this.geolon = geolon;
 	}
 
 	@JsonView(JsonViews.Admin.class)
