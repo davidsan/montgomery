@@ -187,6 +187,50 @@ public class UserResource {
 		return viewWriter.writeValueAsString(user);
 	}
 
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("name/{query}")
+	public String findByName(@PathParam("query") String query)
+			throws JsonGenerationException, JsonMappingException, IOException {
+		this.logger.info("read(query)");
+
+		User user = this.userDao.findByName(query);
+		if (user == null) {
+			throw new WebApplicationException(404);
+		}
+
+		ObjectWriter viewWriter;
+		if (this.isAdmin()) {
+			viewWriter = this.mapper.writerWithView(JsonViews.Admin.class);
+		} else {
+			viewWriter = this.mapper.writerWithView(JsonViews.User.class);
+		}
+
+		return viewWriter.writeValueAsString(user);
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("email/{query}")
+	public String findByEmail(@PathParam("query") String query)
+			throws JsonGenerationException, JsonMappingException, IOException {
+		this.logger.info("read(query)");
+
+		User user = this.userDao.findByEmail(query);
+		if (user == null) {
+			throw new WebApplicationException(404);
+		}
+
+		ObjectWriter viewWriter;
+		if (this.isAdmin()) {
+			viewWriter = this.mapper.writerWithView(JsonViews.Admin.class);
+		} else {
+			viewWriter = this.mapper.writerWithView(JsonViews.User.class);
+		}
+
+		return viewWriter.writeValueAsString(user);
+	}
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
