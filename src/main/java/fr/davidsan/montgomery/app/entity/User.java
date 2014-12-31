@@ -3,6 +3,7 @@ package fr.davidsan.montgomery.app.entity;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CollectionTable;
@@ -11,6 +12,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -37,6 +39,9 @@ public class User implements Entity, UserDetails {
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "users_roles")
 	private Set<String> roles = new HashSet<String>();
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "author")
+	private List<NewsEntry> newsEntries;
 
 	protected User() {
 		/* Reflection instantiation */
@@ -73,6 +78,14 @@ public class User implements Entity, UserDetails {
 
 	public void addRole(String role) {
 		this.roles.add(role);
+	}
+
+	public List<NewsEntry> getNewsEntries() {
+		return newsEntries;
+	}
+
+	public void setNewsEntries(List<NewsEntry> newsEntries) {
+		this.newsEntries = newsEntries;
 	}
 
 	@Override

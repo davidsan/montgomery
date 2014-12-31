@@ -3,8 +3,11 @@ package fr.davidsan.montgomery.app.entity;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -28,6 +31,10 @@ public class NewsEntry implements Entity {
 
 	@Column
 	private String content;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "author_id")
+	private User author;
 
 	public NewsEntry() {
 		this.date = new Date();
@@ -54,6 +61,15 @@ public class NewsEntry implements Entity {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	@JsonView(JsonViews.User.class)
+	public User getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(User author) {
+		this.author = author;
 	}
 
 	@Override
