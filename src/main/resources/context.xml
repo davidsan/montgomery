@@ -20,6 +20,9 @@
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="searchSystemEnvironment" value="true" />
 	</bean>
+
+
+	<!-- BEGIN PRODUCTION DATABASE SETUP -->
 	<bean class="java.net.URI" id="dbUrl">
 		<constructor-arg value="${DATABASE_URL}" />
 	</bean>
@@ -31,8 +34,20 @@
 		<property name="username" value="#{@dbUrl.getUserInfo().split(':')[0]}" />
 		<property name="password" value="#{@dbUrl.getUserInfo().split(':')[1]}" />
 		<property name="maxWait" value="5000" />
-        <property name="connectionProperties" value="ssl=true;sslfactory=org.postgresql.ssl.NonValidatingFactory"></property>
+		<property name="connectionProperties"
+			value="ssl=true;sslfactory=org.postgresql.ssl.NonValidatingFactory"></property>
 	</bean>
+	<!-- END PRODUCTION DATABASE SETUP -->
+
+	<!-- BEGIN DEV DATABASE SETUP -->
+<!-- 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"> -->
+<!-- 	<property name="username" value="sa" /> -->
+<!-- 	<property name="password" value="" /> -->
+<!-- 	<property name="driverClassName" value="org.hsqldb.jdbcDriver" /> -->
+<!-- 	<property name="url" value="jdbc:hsqldb:mem:montgomery" /> -->
+<!-- 	</bean> -->
+	<!-- END DEV DATABASE SETUP -->
+
 
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -46,7 +61,15 @@
 		</property>
 		<property name="jpaProperties">
 			<props>
+
+				<!-- BEGIN PRODUCTION DATABASE SETUP -->
 				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<!-- END PRODUCTION DATABASE SETUP -->
+
+				<!-- BEGIN DEV DATABASE SETUP -->
+<!-- 				<prop key="hibernate.dialect">fr.davidsan.montgomery.app.hsql.CustomHsqlDialect</prop> -->
+				<!-- END DEV DATABASE SETUP -->
+
 				<prop key="hibernate.show_sql">true</prop>
 				<!-- change this to 'verify' before running as a production app -->
 				<prop key="hibernate.hbm2ddl.auto">create-drop</prop>
