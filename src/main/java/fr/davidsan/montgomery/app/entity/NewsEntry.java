@@ -29,12 +29,16 @@ public class NewsEntry implements Entity {
 	@Column
 	private Date date;
 
-	@Column
+	@Column(nullable = false)
 	private String content;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "author_id")
 	private User author;
+
+	private Double geolat;
+
+	private Double geolon;
 
 	public NewsEntry() {
 		this.date = new Date();
@@ -70,6 +74,24 @@ public class NewsEntry implements Entity {
 
 	public void setAuthor(User author) {
 		this.author = author;
+	}
+
+	@JsonView(JsonViews.User.class)
+	public Double getGeolat() {
+		return geolat;
+	}
+
+	public void setGeolat(Double geolat) {
+		this.geolat = geolat;
+	}
+
+	@JsonView(JsonViews.User.class)
+	public Double getGeolon() {
+		return geolon;
+	}
+
+	public void setGeolon(Double geolon) {
+		this.geolon = geolon;
 	}
 
 	@Override

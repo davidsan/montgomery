@@ -98,6 +98,8 @@ public class NewsEntryResource {
 			throw new WebApplicationException(401);
 		}
 		newsEntry.setAuthor(user);
+		newsEntry.setGeolat(user.getGeolat());
+		newsEntry.setGeolon(user.getGeolon());
 		newsEntry = this.newsEntryDao.save(newsEntry);
 
 		return this.mapper.writerWithView(JsonViews.User.class)
