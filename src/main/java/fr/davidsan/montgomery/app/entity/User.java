@@ -52,11 +52,11 @@ public class User implements Entity, UserDetails {
 	private Set<NewsEntry> newsEntries;
 	
 	@Column(nullable = true)
-	@JsonView(JsonViews.Admin.class)
+	@JsonView(JsonViews.User.class)
 	private Double geolat;
 	
 	@Column(nullable = true)
-	@JsonView(JsonViews.Admin.class)
+	@JsonView(JsonViews.User.class)
 	private Double geolon;
  
 	protected User() {
