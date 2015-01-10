@@ -35,7 +35,7 @@
 		<property name="password" value="#{@dbUrl.getUserInfo().split(':')[1]}" />
 		<property name="maxWait" value="5000" />
 		<property name="connectionProperties"
-			value="ssl=true;sslfactory=org.postgresql.ssl.NonValidatingFactory"></property>
+		value="ssl=true;sslfactory=org.postgresql.ssl.NonValidatingFactory"></property>
 	</bean>
 	<!-- END PRODUCTION DATABASE SETUP -->
 
@@ -67,7 +67,7 @@
 				<!-- END PRODUCTION DATABASE SETUP -->
 
 				<!-- BEGIN DEV DATABASE SETUP -->
-<!-- 				<prop key="hibernate.dialect">fr.davidsan.montgomery.app.hsql.CustomHsqlDialect</prop> -->
+				<!-- <prop key="hibernate.dialect">fr.davidsan.montgomery.app.hsql.CustomHsqlDialect</prop> -->
 				<!-- END DEV DATABASE SETUP -->
 
 				<prop key="hibernate.show_sql">true</prop>
@@ -87,9 +87,12 @@
 
 	<bean id="userDao" class="fr.davidsan.montgomery.app.dao.user.JpaUserDao">
 	</bean>
-	
-	<bean id="mailEntryDao" 
-	class="fr.davidsan.montgomery.app.dao.mailentry.JpaMailEntryDao">
+
+	<bean id="mailEntryDao"
+		class="fr.davidsan.montgomery.app.dao.mailentry.JpaMailEntryDao">
+	</bean>
+
+	<bean id="tagDao" class="fr.davidsan.montgomery.app.dao.tag.JpaTagDao">
 	</bean>
 
 	<bean id="dataBaseInitializer" class="fr.davidsan.montgomery.app.dao.DataBaseInitializer"
@@ -97,6 +100,7 @@
 		<constructor-arg ref="userDao" />
 		<constructor-arg ref="newsEntryDao" />
 		<constructor-arg ref="passwordEncoder" />
+		<constructor-arg ref="tagDao" />
 	</bean>
 
 	<tx:annotation-driven transaction-manager="transactionManager" />

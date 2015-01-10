@@ -8,5 +8,6 @@
 		<class>fr.davidsan.montgomery.app.entity.NewsEntry</class>
 		<class>fr.davidsan.montgomery.app.entity.User</class>
 		<class>fr.davidsan.montgomery.app.entity.MailEntry</class>
+		<class>fr.davidsan.montgomery.app.entity.Tag</class>
 	</persistence-unit>
 </persistence>

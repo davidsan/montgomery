@@ -37,7 +37,7 @@ public class JpaNewsEntryDao extends JpaDao<NewsEntry, Long> implements
 		return this
 				.getEntityManager()
 				.createQuery(
-						"SELECT n FROM NewsEntry n WHERE n.author LIKE :user")
+						"SELECT n FROM NewsEntry n WHERE n.newsentry_author LIKE :user")
 				.setParameter("user", user).setMaxResults(100).getResultList();
 	}
 
@@ -55,10 +55,10 @@ public class JpaNewsEntryDao extends JpaDao<NewsEntry, Long> implements
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT n FROM NewsEntry n ");
-		sb.append("WHERE n.geolat >= :minLat ");
-		sb.append("AND n.geolat <= :maxLat ");
-		sb.append("AND n.geolon >= :minLon ");
-		sb.append("AND n.geolon <= :maxLon ");
+		sb.append("WHERE n.newsentry_geolat >= :minLat ");
+		sb.append("AND n.newsentry_geolat <= :maxLat ");
+		sb.append("AND n.newsentry_geolon >= :minLon ");
+		sb.append("AND n.newsentry_geolon <= :maxLon ");
 		sb.append("ORDER BY date DESC");
 		return this.getEntityManager().createQuery(sb.toString())
 				.setParameter("minLat", minLat).setParameter("maxLat", maxLat)

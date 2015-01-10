@@ -6,8 +6,10 @@ import java.util.Date;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import fr.davidsan.montgomery.app.dao.newsentry.NewsEntryDao;
+import fr.davidsan.montgomery.app.dao.tag.TagDao;
 import fr.davidsan.montgomery.app.dao.user.UserDao;
 import fr.davidsan.montgomery.app.entity.NewsEntry;
+import fr.davidsan.montgomery.app.entity.Tag;
 import fr.davidsan.montgomery.app.entity.User;
 
 public class DataBaseInitializer {
@@ -18,15 +20,18 @@ public class DataBaseInitializer {
 
 	private PasswordEncoder passwordEncoder;
 
+	private TagDao tagDao;
+
 	protected DataBaseInitializer() {
 		/* Default constructor for reflection instantiation */
 	}
 
 	public DataBaseInitializer(UserDao userDao, NewsEntryDao newsEntryDao,
-			PasswordEncoder passwordEncoder) {
+			PasswordEncoder passwordEncoder, TagDao tagDao) {
 		this.userDao = userDao;
 		this.newsEntryDao = newsEntryDao;
 		this.passwordEncoder = passwordEncoder;
+		this.tagDao = tagDao;
 	}
 
 	public void initDataBase() {
@@ -60,21 +65,28 @@ public class DataBaseInitializer {
 		l.add(userDao.save(generateFakeUser("amiens", 49.894066, 2.295753)));
 		l.add(userDao.save(generateFakeUser("newyork", 40.714270, -74.005970)));
 
-		long timestamp = System.currentTimeMillis() - 1000 * 1000 * 60 * 60 * 24;
-		for (int i = 0; i < 1000; i++) {
+		ArrayList<Tag> tags = new ArrayList<Tag>();
+		for (int i = 0; i < 10; i++) {
+			tags.add(tagDao.save(new Tag("tag" + i)));
+		}
+
+		long timestamp = System.currentTimeMillis() - 100 * 1000 * 60 * 60 * 24;
+		for (int i = 0; i < 200; i++) {
 			NewsEntry newsEntry = new NewsEntry();
 			newsEntry.setContent("This is example content " + i);
 			newsEntry.setDate(new Date(timestamp));
 			newsEntry.setAuthor(l.get((int) (Math.random() * l.size())));
 			newsEntry.setGeolat(newsEntry.getAuthor().getGeolat());
 			newsEntry.setGeolon(newsEntry.getAuthor().getGeolon());
+			newsEntry.addTags(tags.get((int) (Math.random() * tags.size())));
+			newsEntry.addTags(tags.get((int) (Math.random() * tags.size())));
 			this.newsEntryDao.save(newsEntry);
 			timestamp += 1000;
 		}
 		NewsEntry newsEntry = new NewsEntry();
 		newsEntry.setContent("A message from NYC");
 		newsEntry.setDate(new Date(System.currentTimeMillis()));
-		newsEntry.setAuthor(l.get(l.size()-1));
+		newsEntry.setAuthor(l.get(l.size() - 1));
 		newsEntry.setGeolat(newsEntry.getAuthor().getGeolat());
 		newsEntry.setGeolon(newsEntry.getAuthor().getGeolon());
 		this.newsEntryDao.save(newsEntry);
